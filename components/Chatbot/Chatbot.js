@@ -59,16 +59,20 @@ function Chatbot() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
-  const login = useGoogleLogin({
-    onSuccess: (codeResponse) => setUser(codeResponse),
-    onError: (error) => console.log('Google Sign In Failed:', error),
-  });
+  const login = () => {
+    useGoogleLogin({
+      onSuccess: (codeResponse) => setUser(codeResponse),
+      onError: (error) => console.log('Google Sign In Failed:', error),
+    });
+    refreshUserId();
+  };
 
   const logOut = () => {
     googleLogout();
     setProfile(null);
     setUser(null);
     localStorage.removeItem('cjremmett-ai-googleProfile'); // Clear profile from localStorage
+    refreshUserId();
   };
 
   useEffect(() => {
