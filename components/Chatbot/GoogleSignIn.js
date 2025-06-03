@@ -22,7 +22,10 @@ function GoogleSignIn() {
   useEffect(() => {
     // Load profile from localStorage on initial render
     const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
-    return storedProfile ? JSON.parse(storedProfile) : null;
+    if(storedProfile)
+    {
+      setProfile(storedProfile);
+    }
   }, []);
 
   useEffect(() => {
