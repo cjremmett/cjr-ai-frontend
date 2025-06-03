@@ -120,7 +120,7 @@ function Chatbot() {
           });
           const data = await res.json();
           setProfile(data);
-          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(data)); // Store user in localStorage
+          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
           localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
           console.log(data);
         } catch (error) {
