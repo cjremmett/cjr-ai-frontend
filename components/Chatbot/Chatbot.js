@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import './Chatbot.css';
 import ChatMessages from './ChatMessages';
@@ -6,6 +7,7 @@ import InputArea from './InputArea';
 import ChatSelelectorPane from './ChatSelectorPane';
 import { socket } from "../../socket";
 import GoogleSignIn from "./GoogleSignIn"
+import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 
 let baseUrl = 'https://ectai.cjremmett.com';
 
@@ -54,6 +56,42 @@ function Chatbot() {
     //   ]
 
   const [selectedChat, setSelectedChat] = useState('newchat');
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => setUser(codeResponse),
+    onError: (error) => console.log('Google Sign In Failed:', error),
+  });
+
+  const logOut = () => {
+    googleLogout();
+    setProfile(null);
+    setUser(null);
+    localStorage.removeItem('cjremmett-ai-googleProfile'); // Clear profile from localStorage
+    refreshUserId();
+  };
+
+  useEffect(() => {
+    async function fetchProfile() {
+      if (user) {
+        try {
+          const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+            headers: { Authorization: `Bearer ${user.access_token}` },
+          });
+          const data = await res.json();
+          setProfile(data);
+          localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
+          console.log(data);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      }
+    }
+
+    fetchProfile();
+    refreshUserId();
+  }, [user]);
 
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
   function getQuarterFromString(qString) {
@@ -79,10 +117,50 @@ function Chatbot() {
     }]);
     alert('Failed to connect to the server. Please try again later.');
   }
-  
-  useEffect(() => {
+
+  function populateChats(userid)
+  {
+    // Uses a dummy chat element to respresent the new chat window
+    fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + userid)
+      .then(response => response.json())
+      .then(data => setChats([{
+            "userid": userid,
+            "chatid": 'newchat',
+            "ticker": "",
+            "year": null,
+            "quarter": null,
+            "timestamp": 0
+        },...data]))
+      .catch(() => {handleConnectionFailure()})
+  }
+
+  function getGoogleAccountUserId() {
+      const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+      if (storedProfile) {
+        try {
+          const profile = JSON.parse(storedProfile);
+          return profile.id || null;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+
+  const refreshUserId = () => {
     // Get the userid or create a new one if not found
-    let storedUserid = localStorage.getItem('userid');
+    let storedUserid = null;
+    let googleAccountUserId = getGoogleAccountUserId;
+    let localTempId = localStorage.getItem('cjr-ai-userid');
+    if(googleAccountUserId)
+    {
+      storedUserid = googleAccountUserId;
+    }
+    else if(localTempId)
+    {
+      storedUserid = localTempId;
+    }
+
     if (!storedUserid) {
       // If not found, fetch a new userid from the server
       fetch(baseUrl + "/get-new-ai-userid")
@@ -90,7 +168,7 @@ function Chatbot() {
         .then(data => {
           if(data.userid)
           {
-            localStorage.setItem('userid', data.userid);
+            localStorage.setItem('cjr-ai-userid', data.userid);
             setUserid(data.userid);
             storedUserid = data.userid;
           }
@@ -103,20 +181,22 @@ function Chatbot() {
     } else {
       setUserid(storedUserid);
     }
+  };
+  
+  useEffect(() => {
+    // Load profile from localStorage on initial render
+    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    if(storedProfile)
+    {
+      setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
+    }
 
-    // Uses a dummy chat element to respresent the new chat window
-    fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + storedUserid)
-      .then(response => response.json())
-      .then(data => setChats([{
-            "userid": storedUserid,
-            "chatid": 'newchat',
-            "ticker": "",
-            "year": null,
-            "quarter": null,
-            "timestamp": 0
-        },...data]))
-      .catch(() => {handleConnectionFailure()})
+    refreshUserId();
   }, []);
+
+  useEffect(() => {
+    populateChats(userid);
+  }, [userid]);
     
   useEffect(() => {
     if(selectedChat !== 'newchat')
@@ -229,12 +309,13 @@ function Chatbot() {
     setSelectedChat(chatid);
   };
 
+
   // <div className="auth-info-pane">
   //       {/* Authentication and User Info will go here */}
   //     </div>
   return (
     <div className="chatbot-container">
-      <GoogleSignIn className="auth-info-pane"/>
+      <GoogleSignIn login={ login } logout={ logOut } profile={ profile } className="auth-info-pane"/>
       <ChatSelelectorPane 
         chats={ chats } selectedChat={ selectedChat } 
         handleNewChat={ handleNewChat } handleSelectChat={ handleSelectChat }
