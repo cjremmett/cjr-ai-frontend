@@ -59,13 +59,10 @@ function Chatbot() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
-  const login = () => {
-    useGoogleLogin({
-      onSuccess: (codeResponse) => setUser(codeResponse),
-      onError: (error) => console.log('Google Sign In Failed:', error),
-    });
-    refreshUserId();
-  };
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => setUser(codeResponse),
+    onError: (error) => console.log('Google Sign In Failed:', error),
+  });
 
   const logOut = () => {
     googleLogout();
@@ -91,9 +88,8 @@ function Chatbot() {
         }
       }
     }
-
-    fetchProfile();
-    refreshUserId();
+    console.log('Fetching profile....');
+    fetchProfile().then(() => refreshUserId());
   }, [user]);
 
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
