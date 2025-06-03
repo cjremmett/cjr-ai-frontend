@@ -12,27 +12,6 @@ import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 let baseUrl = 'https://ectai.cjremmett.com';
 
 function Chatbot() {
-  const [messages, setMessages] = useState([]);
-    // Should be in the following format:
-    //   [
-    //     [
-    //         "user",
-    //         "Some user question."
-    //     ],
-    //     [
-    //         "assistant",
-    //         "Some AI response."
-    //     ]
-    //   ]
-
-  const [currentTicker, setCurrentTicker] = useState('');
-  const [currentQuarter, setCurrentQuarter] = useState('');
-  const [inputEnabled, setInputEnabled] = useState(true);
-  const [userid, setUserid] = useState(null);
-  const defaultNewChatMessage = "Please select a stock ticker and quarter. The AI will use RAG to answer questions about the earnings call transcript for that quarter, even if it falls outside the model's knowledge cutoff.";
-  const [newChatMessage, setNewChatMessage] = useState(defaultNewChatMessage);
-  const [newChatError, setNewChatError] = useState(false);
-  const [newChatWorking, setNewChatWorking] = useState(false);
 
   const [chats, setChats] = useState([]);
     // Should be in the following format:
@@ -55,9 +34,69 @@ function Chatbot() {
     //     }
     //   ]
 
+  const [messages, setMessages] = useState([]);
+    // Should be in the following format:
+    //   [
+    //     [
+    //         "user",
+    //         "Some user question."
+    //     ],
+    //     [
+    //         "assistant",
+    //         "Some AI response."
+    //     ]
+    //   ]
+
   const [selectedChat, setSelectedChat] = useState('newchat');
+
+  const [currentTicker, setCurrentTicker] = useState('');
+  const [currentQuarter, setCurrentQuarter] = useState('');
+
+  // Controls whether the user can send a message to the backend
+  const [inputEnabled, setInputEnabled] = useState(true);
+  const [userid, setUserid] = useState(null);
+
+  // newChatMessage is the text displayed on the new chat window. It gets changed to an error message if the user enters a bad ticker, API has no data, etc.
+  const defaultNewChatMessage = "Please select a stock ticker and quarter. The AI will use RAG to answer questions about the earnings call transcript for that quarter, even if it falls outside the model's knowledge cutoff.";
+  const [newChatMessage, setNewChatMessage] = useState(defaultNewChatMessage);
+
+  // Controls whether to show the error message
+  const [newChatError, setNewChatError] = useState(false);
+  
+  // Disables the button to start a new chat while it's already processing a previous request to start a new chat
+  const [newChatWorking, setNewChatWorking] = useState(false);
+
+
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+
+  // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
+  function getQuarterFromString(qString) {
+    const match = /^Q(\d)\s+\d{4}$/.exec(qString);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  // Returns the year as an integer (e.g., 2025 for "Q1 2025")
+  function getYearFromString(qString) {
+    const match = /^Q\d\s+(\d{4})$/.exec(qString);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  // Clears chats and notifies user if there's a failure to connect to the backend
+  // Error handling could be much more graceful but I don't want to spend all my time on that instead of application logic
+  function handleConnectionFailure()
+  {
+    setChats([{
+      "userid": 'dummy',
+      "chatid": 'newchat',
+      "ticker": "",
+      "year": null,
+      "quarter": null,
+      "timestamp": 0
+    }]);
+    alert('Failed to connect to the server. Please try again later.');
+  }
+
 
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => setUser(codeResponse),
@@ -81,6 +120,7 @@ function Chatbot() {
           });
           const data = await res.json();
           setProfile(data);
+          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(data)); // Store user in localStorage
           localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
           console.log(data);
         } catch (error) {
@@ -92,30 +132,9 @@ function Chatbot() {
     fetchProfile().then(() => refreshUserId());
   }, [user]);
 
-  // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
-  function getQuarterFromString(qString) {
-    const match = /^Q(\d)\s+\d{4}$/.exec(qString);
-    return match ? parseInt(match[1], 10) : null;
-  }
+  
 
-  // Returns the year as an integer (e.g., 2025 for "Q1 2025")
-  function getYearFromString(qString) {
-    const match = /^Q\d\s+(\d{4})$/.exec(qString);
-    return match ? parseInt(match[1], 10) : null;
-  }
-
-  function handleConnectionFailure()
-  {
-    setChats([{
-      "userid": 'dummy',
-      "chatid": 'newchat',
-      "ticker": "",
-      "year": null,
-      "quarter": null,
-      "timestamp": 0
-    }]);
-    alert('Failed to connect to the server. Please try again later.');
-  }
+  
 
   function populateChats(userid)
   {
