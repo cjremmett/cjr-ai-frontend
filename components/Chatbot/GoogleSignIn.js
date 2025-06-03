@@ -3,7 +3,11 @@ import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 
 function GoogleSignIn() {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => {
+    // Load profile from localStorage on initial render
+    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    return storedProfile ? JSON.parse(storedProfile) : null;
+  });
 
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => setUser(codeResponse),
@@ -13,6 +17,7 @@ function GoogleSignIn() {
   const logOut = () => {
     googleLogout();
     setProfile(null);
+    localStorage.removeItem('cjremmett-ai-googleProfile'); // Clear profile from localStorage
   };
 
   useEffect(() => {
@@ -24,6 +29,7 @@ function GoogleSignIn() {
           });
           const data = await res.json();
           setProfile(data);
+          localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
           console.log(data);
         } catch (error) {
           console.error('Error fetching user profile:', error);
@@ -41,7 +47,7 @@ function GoogleSignIn() {
       ) : (
         <div>
           <h3>Welcome, {profile.name}!</h3>
-          <button onClick={logOut}>Sign Out 👋</button>
+          <button onClick={logOut}>Sign Out</button>
         </div>
       )}
     </div>
