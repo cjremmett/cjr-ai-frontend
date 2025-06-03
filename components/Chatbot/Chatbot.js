@@ -28,7 +28,7 @@ function Chatbot() {
   const [currentTicker, setCurrentTicker] = useState('');
   const [currentQuarter, setCurrentQuarter] = useState('');
   const [inputEnabled, setInputEnabled] = useState(true);
-  const [userid, setUserid] = useState('');
+  const [userid, setUserid] = useState(null);
   const defaultNewChatMessage = "Please select a stock ticker and quarter. The AI will use RAG to answer questions about the earnings call transcript for that quarter, even if it falls outside the model's knowledge cutoff.";
   const [newChatMessage, setNewChatMessage] = useState(defaultNewChatMessage);
   const [newChatError, setNewChatError] = useState(false);
@@ -69,7 +69,6 @@ function Chatbot() {
     setProfile(null);
     setUser(null);
     localStorage.removeItem('cjremmett-ai-googleProfile'); // Clear profile from localStorage
-    refreshUserId();
   };
 
   useEffect(() => {
@@ -148,6 +147,7 @@ function Chatbot() {
     }
 
   const refreshUserId = () => {
+    console.log('Triggered userid refresh.');
     // Get the userid or create a new one if not found
     let storedUserid = null;
     let googleAccountUserId = getGoogleAccountUserId;
@@ -160,6 +160,7 @@ function Chatbot() {
     {
       storedUserid = localTempId;
     }
+    console.log('storedUserid is: ' + storedUserid);
 
     if (!storedUserid) {
       // If not found, fetch a new userid from the server
