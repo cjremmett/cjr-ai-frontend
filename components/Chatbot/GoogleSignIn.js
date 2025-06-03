@@ -1,13 +1,11 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 
+
 function GoogleSignIn() {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(() => {
-    // Load profile from localStorage on initial render
-    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
-    return storedProfile ? JSON.parse(storedProfile) : null;
-  });
+  const [profile, setProfile] = useState(null);
 
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => setUser(codeResponse),
@@ -17,8 +15,15 @@ function GoogleSignIn() {
   const logOut = () => {
     googleLogout();
     setProfile(null);
+    setUser(null);
     localStorage.removeItem('cjremmett-ai-googleProfile'); // Clear profile from localStorage
   };
+
+  useEffect(() => {
+    // Load profile from localStorage on initial render
+    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    return storedProfile ? JSON.parse(storedProfile) : null;
+  }, []);
 
   useEffect(() => {
     async function fetchProfile() {
