@@ -66,8 +66,9 @@ function Chatbot() {
   // Disables the button to start a new chat while it's already processing a previous request to start a new chat
   const [newChatWorking, setNewChatWorking] = useState(false);
 
-
+  // Contains the authorization token for completing the OAuth handshake
   const [user, setUser] = useState(null);
+  // Contains user profile information (e.g. name, email, google id)
   const [profile, setProfile] = useState(null);
 
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
@@ -97,17 +98,91 @@ function Chatbot() {
     alert('Failed to connect to the server. Please try again later.');
   }
 
+  const handleNewChat = async () => {
+    try 
+    {
+      if (currentTicker && currentQuarter) {
+        setNewChatWorking(true);
+        const data = {
+          userid: userid,
+          ticker: currentTicker,
+          quarter: getQuarterFromString(currentQuarter),
+          year: getYearFromString(currentQuarter)
+        };
+  
+      let response = await fetch(baseUrl + '/start-new-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
 
+      if(response.status > 400)
+      {
+        handleConnectionFailure();
+        return;
+      }
+      else if(response.status === 400)
+      {
+        setNewChatMessage("We were unable to retrieve an earnings call transcript for the ticker and quarter you selected. Please double check your input. Note that the transcript service may not have transcripts for all publicly listed stocks - try a ticker for a large and well known company, such as AAPL or MSFT.")
+        setNewChatError(true);
+        return;
+      }
+      else
+      {
+        setNewChatMessage(defaultNewChatMessage);
+        setNewChatError(false);
+      }
+  
+      // If we pulled the transcript OK, make API call to get updated list of chats
+      // and then switch to the newly created one.
+      response = await response.json();
+      const newChatKey = response['chatid'];
+      // Uses a dummy chat element to respresent the new chat window
+      fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + userid)
+        .then(response => response.json())
+        .then(data => setChats([{
+              "userid": userid,
+              "chatid": 'newchat',
+              "ticker": "",
+              "year": null,
+              "quarter": null,
+              "timestamp": 0
+          },...data]))
+        .then(() => setSelectedChat(newChatKey))
+        .catch(() => {handleConnectionFailure()})
+      }
+      else
+      {
+        setNewChatMessage("Please enter a ticker and select a quarter before starting a new chat.")
+        setNewChatError(true);
+      }
+    }
+    finally
+    {
+      setNewChatWorking(false);
+    }
+  };
+
+  const handleSelectChat = (chatid) => {
+    setSelectedChat(chatid);
+  };
+
+  // Uses Google library to handle OAuth handshake
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => setUser(codeResponse),
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
 
+  // Clean up Google account info and switch back to local userid
   const logOut = () => {
     googleLogout();
     setProfile(null);
     setUser(null);
-    localStorage.removeItem('cjremmett-ai-googleProfile'); // Clear profile from localStorage
+    // Clear Google account info from localstorage
+    localStorage.removeItem('cjremmett-ai-googleProfile');
+    localStorage.removeItem('cjremmett-ai-googleUser');
     refreshUserId();
   };
 
@@ -266,73 +341,6 @@ function Chatbot() {
     ]]);
   });
 
-  const handleNewChat = async () => {
-    try 
-    {
-      if (currentTicker && currentQuarter) {
-        setNewChatWorking(true);
-        const data = {
-          userid: userid,
-          ticker: currentTicker,
-          quarter: getQuarterFromString(currentQuarter),
-          year: getYearFromString(currentQuarter)
-        };
-  
-      let response = await fetch(baseUrl + '/start-new-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      console.log(response.status);
-      console.log(typeof(response.status));
-      if(response.status > 400)
-      {
-        handleConnectionFailure();
-        return;
-      }
-      else if(response.status === 400)
-      {
-        setNewChatMessage("We were unable to retrieve an earnings call transcript for the ticker and quarter you selected. Please double check your input. Note that the transcript service may not have transcripts for all publicly listed stocks - try a ticker for a large and well known company, such as AAPL or MSFT.")
-        setNewChatError(true);
-        return;
-      }
-  
-      setNewChatMessage(defaultNewChatMessage);
-      setNewChatError(false);
-  
-      response = await response.json();
-      const newChatKey = response['chatid'];
-      // Uses a dummy chat element to respresent the new chat window
-      fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + userid)
-        .then(response => response.json())
-        .then(data => setChats([{
-              "userid": userid,
-              "chatid": 'newchat',
-              "ticker": "",
-              "year": null,
-              "quarter": null,
-              "timestamp": 0
-          },...data]))
-        .then( () => setSelectedChat(newChatKey))
-        .catch(() => {handleConnectionFailure()})
-      }
-    }
-    finally
-    {
-      setNewChatWorking(false);
-    }
-  };
-
-  const handleSelectChat = (chatid) => {
-    setSelectedChat(chatid);
-  };
-
-
-  // <div className="auth-info-pane">
-  //       {/* Authentication and User Info will go here */}
-  //     </div>
   return (
     <div className="chatbot-container">
       <GoogleSignIn login={ login } logOut={ logOut } profile={ profile } className="auth-info-pane"/>
