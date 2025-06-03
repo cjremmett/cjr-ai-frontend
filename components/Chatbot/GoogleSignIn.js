@@ -24,7 +24,7 @@ function GoogleSignIn() {
     const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
     if(storedProfile)
     {
-      setProfile(storedProfile);
+      setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
     }
   }, []);
 
