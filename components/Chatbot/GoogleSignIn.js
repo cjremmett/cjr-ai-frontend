@@ -24,6 +24,7 @@ function GoogleSignIn() {
           });
           const data = await res.json();
           setProfile(data);
+          console.log(data);
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
@@ -31,8 +32,6 @@ function GoogleSignIn() {
     }
 
     fetchProfile();
-    console.log(user);
-    console.log(profile);
   }, [user]);
 
   return (
@@ -42,7 +41,6 @@ function GoogleSignIn() {
       ) : (
         <div>
           <h3>Welcome, {profile.name}!</h3>
-          <img src={profile.picture} alt="User avatar" style={{ borderRadius: '50%', marginRight: '10px' }} />
           <button onClick={logOut}>Sign Out 👋</button>
         </div>
       )}
