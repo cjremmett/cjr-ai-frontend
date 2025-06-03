@@ -150,7 +150,7 @@ function Chatbot() {
     console.log('Triggered userid refresh.');
     // Get the userid or create a new one if not found
     let storedUserid = null;
-    let googleAccountUserId = getGoogleAccountUserId;
+    let googleAccountUserId = getGoogleAccountUserId();
     let localTempId = localStorage.getItem('cjr-ai-userid');
     if(googleAccountUserId)
     {
