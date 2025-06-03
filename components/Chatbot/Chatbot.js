@@ -315,7 +315,7 @@ function Chatbot() {
   //     </div>
   return (
     <div className="chatbot-container">
-      <GoogleSignIn login={ login } logout={ logOut } profile={ profile } className="auth-info-pane"/>
+      <GoogleSignIn login={ login } logOut={ logOut } profile={ profile } className="auth-info-pane"/>
       <ChatSelelectorPane 
         chats={ chats } selectedChat={ selectedChat } 
         handleNewChat={ handleNewChat } handleSelectChat={ handleSelectChat }
