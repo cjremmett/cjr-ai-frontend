@@ -185,6 +185,7 @@ function Chatbot() {
 
     setProfile(null);
     setUser(null);
+    setSelectedChat('newchat');
     setUserid(getUserId());
   };
 
@@ -283,6 +284,7 @@ function Chatbot() {
       }
     }
 
+    setSelectedChat('newchat');
     if(user)
     {
       fetchProfile().then(() => setUserid(getUserId()));
