@@ -1,4 +1,5 @@
 .selector-placeholder {
+    margin-top: 24px;
     margin-bottom: 18px;
     font-size: 1.1em;
     color: #444;
@@ -38,8 +39,9 @@
     font-size: 1.1em;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 8px;
-    width: 100%;
+    margin: 0 auto;             /* Center the button horizontally */
+    display: block;             /* Ensure margin auto works */
+    width: fit-content;         /* Button only as wide as content */
     max-width: 300px;
 }
 

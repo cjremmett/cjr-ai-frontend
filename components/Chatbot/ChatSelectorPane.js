@@ -21,7 +21,7 @@ function ChatSelectorPane({ chats, selectedChat, handleSelectChat }) {
       {chats.map((chat) => (
         <div
           key={chat.chatid}
-          className={ getChatPaneClasses(chat) }
+          className={`${getChatPaneClasses(chat)}`}
           onClick={() => handleSelectChat(chat.chatid)}
         >
           {`${chat.chatid !== 'newchat' ? chat.ticker + ' - Q' + chat.quarter + ' ' + chat.year: 'Start New Chat'}`}

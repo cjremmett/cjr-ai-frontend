@@ -1,24 +1,37 @@
+.chat-container {
+  padding: 20px 16px 20px 16px; /* Add padding so messages aren't pressed against edges */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
 .message {
-  margin-bottom: 12px;
+  display: inline-block; /* Only wrap the content, not the full width */
+  margin-bottom: 14px;
   padding: 10px 16px;
   border-radius: 8px;
   max-width: 80%; /* Prevent messages from taking up the whole width */
-  clear: both; /* Ensure proper float clearing */
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 .user-message {
   background-color: #d4edda; /* Light green */
-  color: #155724; /* Dark green text */
-  align-self: flex-end; /* Align user messages to the right */
+  color: #155724;
+  align-self: flex-end;
+  margin-left: auto; /* Push user messages to the right */
 }
 
 .assistant-message {
   background-color: #cce5ff; /* Light blue */
-  color: #004085; /* Dark blue text */
-  align-self: flex-start; /* Align assistant messages to the left */
+  color: #004085;
+  align-self: flex-start;
+  margin-right: auto; /* Push assistant messages to the left */
 }
 
 .message-content {
   margin: 0;
-  word-break: break-word; /* Prevent long words from breaking layout */
+  word-break: break-word;
 }
