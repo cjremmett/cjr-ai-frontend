@@ -179,7 +179,7 @@ function Chatbot() {
   // RefreshUserId() is called by the useEffect function on user change.
   const logOut = () => {
     googleLogout();
-    
+
     // Clear Google account info from localstorage
     localStorage.removeItem('cjremmett-ai-googleProfile');
     localStorage.removeItem('cjremmett-ai-googleUser');
@@ -225,16 +225,15 @@ function Chatbot() {
     // Use the Google ID if available, if not then
     // use the local ID, if that doesn't exist either then
     // call the backend to get a new local ID
-    let storedUserid = null;
     let googleAccountUserId = getGoogleAccountUserId();
     let localTempId = localStorage.getItem('cjr-ai-userid');
     if(googleAccountUserId)
     {
-      storedUserid = googleAccountUserId;
+      setUserid(googleAccountUserId);
     }
     else if(localTempId)
     {
-      storedUserid = localTempId;
+      setUserid(localTempId);
     }
     else
     {
@@ -246,7 +245,6 @@ function Chatbot() {
           {
             localStorage.setItem('cjr-ai-userid', data.userid);
             setUserid(data.userid);
-            storedUserid = data.userid;
           }
           else
           {
@@ -255,7 +253,6 @@ function Chatbot() {
         })
         .catch(() => {handleConnectionFailure()})
     }
-    console.log('storedUserid is now: ' + storedUserid);
   };
   
   useEffect(() => {
