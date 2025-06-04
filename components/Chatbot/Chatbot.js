@@ -219,7 +219,7 @@ function Chatbot() {
       .catch(() => {handleConnectionFailure()})
   }
 
-  const refreshUserId = () => {
+  const getUserId = () => {
     console.log('Triggered userid refresh.');
 
     // Use the Google ID if available, if not then
@@ -229,11 +229,11 @@ function Chatbot() {
     let localTempId = localStorage.getItem('cjr-ai-userid');
     if(googleAccountUserId)
     {
-      setUserid(googleAccountUserId);
+      return googleAccountUserId;
     }
     else if(localTempId)
     {
-      setUserid(localTempId);
+      return localTempId;
     }
     else
     {
@@ -244,7 +244,7 @@ function Chatbot() {
           if(data.userid)
           {
             localStorage.setItem('cjr-ai-userid', data.userid);
-            setUserid(data.userid);
+            return data.userid;
           }
           else
           {
@@ -264,7 +264,7 @@ function Chatbot() {
       setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
     }
 
-    refreshUserId();
+    setUserid(getUserId());
   }, []);
 
   // Only called when the user logs in or out of their Google account
@@ -286,11 +286,14 @@ function Chatbot() {
       }
     }
     
-    fetchProfile().then(() => refreshUserId());
+    fetchProfile().then(() => setUserid(getUserId()));
   }, [user]);
 
   useEffect(() => {
-    populateChats();
+    if(userid)
+    {
+      populateChats();
+    }
   }, [userid]);
     
   // Make an API call to populate the contents of the chat the user switched to.
@@ -309,7 +312,7 @@ function Chatbot() {
     }
     else
     {
-      setMessages([[]])
+      setMessages([[]]);
     }
   }, [selectedChat]);
 
