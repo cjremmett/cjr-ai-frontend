@@ -2,18 +2,28 @@
   width: 180px;
   height: 60px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: transparent; /* Changed from #f8f9fa to transparent */
-  border: none;            /* Removed border */
+  background: transparent;
+  border: none;
   border-radius: 8px;
-  box-shadow: none;        /* Removed box-shadow */
+  box-shadow: none;
   margin-left: auto;
   margin-right: 0;
   margin-top: 10px;
   margin-bottom: 10px;
   min-width: 180px;
   min-height: 60px;
+}
+
+.googleSignInContainer .welcome-area {
+  height: 22px; /* Reserve space for the welcome message */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 2px;
 }
 
 .googleSignInContainer button {
