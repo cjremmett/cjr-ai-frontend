@@ -9,7 +9,7 @@ function InputArea({ inputEnabled, handleSendMessage, selectedChat })
   }
 
   return (
-    <div>
+    <div className="input-area">
         <input
         type="text"
         placeholder="Type your message..."

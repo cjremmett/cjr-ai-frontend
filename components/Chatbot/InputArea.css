@@ -1,8 +1,23 @@
+.input-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-top: 1px solid #eee; /* Add a border bar above the input area */
+}
+
 .input-area input[type="text"] {
   flex-grow: 1;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 1em;
+  min-width: 0;
+  background: #fafbfc;
 }
 
 .input-area button {
@@ -13,6 +28,7 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  white-space: nowrap;
 }
 
 .input-area button:hover {

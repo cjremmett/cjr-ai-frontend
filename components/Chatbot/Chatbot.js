@@ -369,21 +369,34 @@ function Chatbot() {
         </div>
       </div>
       <div className="chatbot-container">
-        <ChatSelelectorPane classname="chat-selector-pane"
+        <ChatSelelectorPane
           chats={ chats } selectedChat={ selectedChat } 
           handleNewChat={ handleNewChat } handleSelectChat={ handleSelectChat }
         />
-        <TickerAndQuarterSelector classname="ticker-and-quarter-selector"
-          currentTicker={ currentTicker } setCurrentTicker={ setCurrentTicker } 
-          currentQuarter={ currentQuarter } setCurrentQuarter={ setCurrentQuarter } 
-          selectedChat ={ selectedChat } onStartNewChat={ handleNewChat }
-          newChatMessage={ newChatMessage} newChatError={ newChatError }
-          newChatWorking={ newChatWorking }
-        />
-        <ChatMessages classname="chat-messages"
-          messages={ messages } selectedChat={ selectedChat }/>
-        <InputArea classname="input-area"
-          inputEnabled={ inputEnabled } handleSendMessage={ handleSendMessage } selectedChat={ selectedChat }/>
+        {selectedChat === 'newchat' && (
+          <div className="ticker-quarter-pane">
+            <TickerAndQuarterSelector classname="ticker-and-quarter-selector"
+              currentTicker={ currentTicker } setCurrentTicker={ setCurrentTicker } 
+              currentQuarter={ currentQuarter } setCurrentQuarter={ setCurrentQuarter } 
+              selectedChat ={ selectedChat } onStartNewChat={ handleNewChat }
+              newChatMessage={ newChatMessage} newChatError={ newChatError }
+              newChatWorking={ newChatWorking }
+            />
+          </div>
+        )}
+        <div className="message-pane">
+          <ChatMessages
+            messages={messages}
+            selectedChat={selectedChat}
+          />
+          <div>
+            <InputArea
+              inputEnabled={inputEnabled}
+              handleSendMessage={handleSendMessage}
+              selectedChat={selectedChat}
+            />
+          </div>
+        </div>
       </div>
     </>
   );
