@@ -175,42 +175,34 @@ function Chatbot() {
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
 
-  // Clean up Google account info and switch back to local userid
+  // Clean up Google account info.
+  // RefreshUserId() is called by the useEffect function on user change.
   const logOut = () => {
     googleLogout();
-    setProfile(null);
-    setUser(null);
+    
     // Clear Google account info from localstorage
     localStorage.removeItem('cjremmett-ai-googleProfile');
     localStorage.removeItem('cjremmett-ai-googleUser');
-    refreshUserId();
+
+    setProfile(null);
+    setUser(null);
   };
 
-  useEffect(() => {
-    async function fetchProfile() {
-      if (user) {
-        try {
-          const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
-            headers: { Authorization: `Bearer ${user.access_token}` },
-          });
-          const data = await res.json();
-          setProfile(data);
-          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
-          localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
-          console.log(data);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-        }
+  // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
+  function getGoogleAccountUserId() {
+    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    if (storedProfile) {
+      try {
+        const profile = JSON.parse(storedProfile);
+        return profile.id || null;
+      } catch {
+        return null;
       }
     }
-    console.log('Fetching profile....');
-    fetchProfile().then(() => refreshUserId());
-  }, [user]);
+    return null;
+  } 
 
-  
-
-  
-
+  // Makes an API call to update the list of chats
   function populateChats(userid)
   {
     // Uses a dummy chat element to respresent the new chat window
@@ -227,22 +219,12 @@ function Chatbot() {
       .catch(() => {handleConnectionFailure()})
   }
 
-  function getGoogleAccountUserId() {
-      const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
-      if (storedProfile) {
-        try {
-          const profile = JSON.parse(storedProfile);
-          return profile.id || null;
-        } catch {
-          return null;
-        }
-      }
-      return null;
-    }
-
   const refreshUserId = () => {
     console.log('Triggered userid refresh.');
-    // Get the userid or create a new one if not found
+
+    // Use the Google ID if available, if not then
+    // use the local ID, if that doesn't exist either then
+    // call the backend to get a new local ID
     let storedUserid = null;
     let googleAccountUserId = getGoogleAccountUserId();
     let localTempId = localStorage.getItem('cjr-ai-userid');
@@ -254,9 +236,8 @@ function Chatbot() {
     {
       storedUserid = localTempId;
     }
-    console.log('storedUserid is: ' + storedUserid);
-
-    if (!storedUserid) {
+    else
+    {
       // If not found, fetch a new userid from the server
       fetch(baseUrl + "/get-new-ai-userid")
         .then(response => response.json())
@@ -273,9 +254,8 @@ function Chatbot() {
           }
         })
         .catch(() => {handleConnectionFailure()})
-    } else {
-      setUserid(storedUserid);
     }
+    console.log('storedUserid is now: ' + storedUserid);
   };
   
   useEffect(() => {
@@ -289,10 +269,38 @@ function Chatbot() {
     refreshUserId();
   }, []);
 
+  // Only called when the user logs in or out of their Google account
+  // Upon logout only refreshes userid
+  useEffect(() => {
+    async function fetchProfile() {
+      if (user) {
+        try {
+          const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+            headers: { Authorization: `Bearer ${user.access_token}` },
+          });
+          const data = await res.json();
+          setProfile(data);
+          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
+          localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      }
+    }
+    
+    fetchProfile().then(() => refreshUserId());
+  }, [user]);
+
   useEffect(() => {
     populateChats(userid);
   }, [userid]);
     
+  // Make an API call to populate the contents of the chat the user switched to.
+  // If they're in newchat, clear the message array.
+  // An improvement would be to make this API call when the user hovers over the chat
+  // button rather than when they click to make the UI appear faster. I could also cache
+  // the results locally and show the cache while making the API call to update the messages
+  // with the authoritative backend chat history.
   useEffect(() => {
     if(selectedChat !== 'newchat')
     {
@@ -307,6 +315,11 @@ function Chatbot() {
     }
   }, [selectedChat]);
 
+  // Enable or disable the button to send a message when a new message comes in
+  // depending on whether the last message is the response from the AI model.
+  // Gets set to disabled when the user presses the send button because there is
+  // a small time lag between sending the message and receiving the response
+  // from the backend via websocket.
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if(lastMessage && lastMessage[0] === 'assistant')
@@ -319,22 +332,26 @@ function Chatbot() {
     }
   }, [messages]);
 
+  // Sends message to backend to get a response from the AI model
+  // Doesn't automatically put message in chat - wait until confirmation from
+  // backend to populate the user's message in the UI.
   const handleSendMessage = (newMessage) => {
     if (selectedChat !== 'newchat' && newMessage.trim() && inputEnabled) {
-      setInputEnabled(false); // Disable the button
-      const userMessage = { chatid: selectedChat, message: newMessage };
+      // Disable send button
+      // This won't get disabled by the useEffect function until we receive 
+      // our own message in confirmation from the backend
+      setInputEnabled(false);
+
+      const userMessage = { chatid: selectedChat, message: newMessage.trim() };
       socket.emit("earnings_call_transcript_chat_message", userMessage);
-    }
-    else
-    {
-      handleNewChat();
     }
   };
 
+  // Messages are sent as a string but the string represents JSON and needs to be parsed
   socket.on("earnings_call_transcript_chat_message", (message) => {
-    console.log('Received: ' + message);
+    //console.log('Received: ' + message);
     message = JSON.parse(message);
-    console.log('Content of messages: ' + messages);
+    //console.log('Content of messages: ' + messages);
     setMessages(() => [...messages, [
       message.role,
       message.message
