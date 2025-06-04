@@ -8,9 +8,9 @@ function TickerAndQuarterSelector({ currentTicker, setCurrentTicker, currentQuar
         const currentYear = new Date().getFullYear();
 
         for (let year = currentYear; year >= currentYear - 25; year--) {
-            for (let quarter = 4; quarter >= 1; quarter--) {
-                options.push(`Q${quarter} ${year}`);
-            }
+          for (let quarter = 4; quarter >= 1; quarter--) {
+            options.push(`Q${quarter} ${year}`);
+          }
         }
 
         return options;
@@ -24,7 +24,7 @@ function TickerAndQuarterSelector({ currentTicker, setCurrentTicker, currentQuar
     }
 
     return (
-      <div className="chat-input-pane-centered">
+      <div>
         <div
           className="selector-placeholder"
           style={{ color: newChatError ? 'red' : '#444' }}

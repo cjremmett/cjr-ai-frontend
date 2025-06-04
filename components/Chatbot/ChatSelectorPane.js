@@ -1,6 +1,5 @@
 import React from 'react';
 import './ChatSelectorPane.css';
-import classNames from 'classnames';
 
 function ChatSelectorPane({ chats, selectedChat, handleSelectChat }) {
   function getChatPaneClasses(chat)

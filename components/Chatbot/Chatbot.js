@@ -362,24 +362,30 @@ function Chatbot() {
   });
 
   return (
-    <div className="chatbot-container">
-      <GoogleSignIn login={ login } logOut={ logOut } profile={ profile } className="auth-info-pane"/>
-      <ChatSelelectorPane 
-        chats={ chats } selectedChat={ selectedChat } 
-        handleNewChat={ handleNewChat } handleSelectChat={ handleSelectChat }
-      />
-      <TickerAndQuarterSelector
-        currentTicker={ currentTicker } setCurrentTicker={ setCurrentTicker } 
-        currentQuarter={ currentQuarter } setCurrentQuarter={ setCurrentQuarter } 
-        selectedChat ={ selectedChat } onStartNewChat={ handleNewChat }
-        newChatMessage={ newChatMessage} newChatError={ newChatError }
-        newChatWorking={ newChatWorking }
-      />
-      <div className="message-view-pane">
-        <ChatMessages messages={ messages } selectedChat={ selectedChat }/>
-        <InputArea inputEnabled={ inputEnabled } handleSendMessage={ handleSendMessage } selectedChat={ selectedChat }/>
+    <>
+      <div className="auth-info-pane">
+        <div className="google-signin-fixed">
+          <GoogleSignIn login={ login } logOut={ logOut } profile={ profile } />
+        </div>
       </div>
-    </div>
+      <div className="chatbot-container">
+        <ChatSelelectorPane classname="chat-selector-pane"
+          chats={ chats } selectedChat={ selectedChat } 
+          handleNewChat={ handleNewChat } handleSelectChat={ handleSelectChat }
+        />
+        <TickerAndQuarterSelector classname="ticker-and-quarter-selector"
+          currentTicker={ currentTicker } setCurrentTicker={ setCurrentTicker } 
+          currentQuarter={ currentQuarter } setCurrentQuarter={ setCurrentQuarter } 
+          selectedChat ={ selectedChat } onStartNewChat={ handleNewChat }
+          newChatMessage={ newChatMessage} newChatError={ newChatError }
+          newChatWorking={ newChatWorking }
+        />
+        <ChatMessages classname="chat-messages"
+          messages={ messages } selectedChat={ selectedChat }/>
+        <InputArea classname="input-area"
+          inputEnabled={ inputEnabled } handleSendMessage={ handleSendMessage } selectedChat={ selectedChat }/>
+      </div>
+    </>
   );
 }
 

@@ -1,0 +1,33 @@
+.googleSignInContainer {
+  width: 180px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent; /* Changed from #f8f9fa to transparent */
+  border: none;            /* Removed border */
+  border-radius: 8px;
+  box-shadow: none;        /* Removed box-shadow */
+  margin-left: auto;
+  margin-right: 0;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  min-width: 180px;
+  min-height: 60px;
+}
+
+.googleSignInContainer button {
+  width: 100%;
+  height: 40px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  background: #4285f4;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.googleSignInContainer button:hover {
+  background: #357ae8;
+}

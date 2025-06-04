@@ -1,37 +1,24 @@
-
-.chat-container {
-    background-color: #f9f9f9;
-    padding: 16px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-    min-height: 0;
-    height: 100%;
-    justify-content: flex-start;
+.message {
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  max-width: 80%; /* Prevent messages from taking up the whole width */
+  clear: both; /* Ensure proper float clearing */
 }
-  
-  .message {
-    margin-bottom: 12px;
-    padding: 10px 16px;
-    border-radius: 8px;
-    max-width: 80%; /* Prevent messages from taking up the whole width */
-    clear: both; /* Ensure proper float clearing */
-  }
-  
-  .user-message {
-    background-color: #d4edda; /* Light green */
-    color: #155724; /* Dark green text */
-    align-self: flex-end; /* Align user messages to the right */
-  }
-  
-  .assistant-message {
-    background-color: #cce5ff; /* Light blue */
-    color: #004085; /* Dark blue text */
-    align-self: flex-start; /* Align assistant messages to the left */
-  }
-  
-  .message-content {
-    margin: 0;
-    word-break: break-word; /* Prevent long words from breaking layout */
-  }
+
+.user-message {
+  background-color: #d4edda; /* Light green */
+  color: #155724; /* Dark green text */
+  align-self: flex-end; /* Align user messages to the right */
+}
+
+.assistant-message {
+  background-color: #cce5ff; /* Light blue */
+  color: #004085; /* Dark blue text */
+  align-self: flex-start; /* Align assistant messages to the left */
+}
+
+.message-content {
+  margin: 0;
+  word-break: break-word; /* Prevent long words from breaking layout */
+}
