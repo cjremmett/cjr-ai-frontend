@@ -176,7 +176,6 @@ function Chatbot() {
   });
 
   // Clean up Google account info.
-  // RefreshUserId() is called by the useEffect function on user change.
   const logOut = () => {
     googleLogout();
 
@@ -186,6 +185,7 @@ function Chatbot() {
 
     setProfile(null);
     setUser(null);
+    setUserid(getUserId());
   };
 
   // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
@@ -268,25 +268,25 @@ function Chatbot() {
   }, []);
 
   // Only called when the user logs in or out of their Google account
-  // Upon logout only refreshes userid
   useEffect(() => {
     async function fetchProfile() {
-      if (user) {
-        try {
-          const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
-            headers: { Authorization: `Bearer ${user.access_token}` },
-          });
-          const data = await res.json();
-          setProfile(data);
-          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
-          localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-        }
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+          headers: { Authorization: `Bearer ${user.access_token}` },
+        });
+        const data = await res.json();
+        setProfile(data);
+        localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
+        localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
       }
     }
-    
-    fetchProfile().then(() => setUserid(getUserId()));
+
+    if(user)
+    {
+      fetchProfile().then(() => setUserid(getUserId()));
+    }
   }, [user]);
 
   useEffect(() => {
