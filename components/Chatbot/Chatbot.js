@@ -203,7 +203,7 @@ function Chatbot() {
   } 
 
   // Makes an API call to update the list of chats
-  function populateChats(userid)
+  function populateChats()
   {
     // Uses a dummy chat element to respresent the new chat window
     fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + userid)
@@ -290,7 +290,7 @@ function Chatbot() {
   }, [user]);
 
   useEffect(() => {
-    populateChats(userid);
+    populateChats();
   }, [userid]);
     
   // Make an API call to populate the contents of the chat the user switched to.
