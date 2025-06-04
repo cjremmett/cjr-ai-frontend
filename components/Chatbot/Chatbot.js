@@ -256,6 +256,7 @@ function Chatbot() {
   };
   
   useEffect(() => {
+    console.log('Initial render triggered...');
     // Load profile from localStorage on initial render
     const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
     if(storedProfile)
