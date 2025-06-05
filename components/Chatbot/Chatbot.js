@@ -186,7 +186,7 @@ function Chatbot() {
     setProfile(null);
     setUser(null);
     setSelectedChat('newchat');
-    setUserid(getUserId());
+    getUserId.then((refreshedUserId) => setUserid(refreshedUserId));
   };
 
   // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
@@ -220,7 +220,7 @@ function Chatbot() {
       .catch(() => {handleConnectionFailure()})
   }
 
-  const getUserId = () => {
+  const getUserId = new Promise((resolve, reject) => {
     console.log('Triggered userid refresh.');
 
     // Use the Google ID if available, if not then
@@ -230,11 +230,11 @@ function Chatbot() {
     let localTempId = localStorage.getItem('cjr-ai-userid');
     if(googleAccountUserId)
     {
-      return googleAccountUserId;
+      resolve(googleAccountUserId);
     }
     else if(localTempId)
     {
-      return localTempId;
+      resolve(localTempId);
     }
     else
     {
@@ -245,7 +245,7 @@ function Chatbot() {
           if(data.userid)
           {
             localStorage.setItem('cjr-ai-userid', data.userid);
-            return data.userid;
+            resolve(data.userid);
           }
           else
           {
@@ -254,7 +254,7 @@ function Chatbot() {
         })
         .catch(() => {handleConnectionFailure()})
     }
-  };
+  });
   
   useEffect(() => {
     console.log('Initial render triggered...');
@@ -265,7 +265,7 @@ function Chatbot() {
       setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
     }
 
-    setUserid(getUserId());
+    getUserId.then((refreshedUserId) => setUserid(refreshedUserId));
   }, []);
 
   // Only called when the user logs in or out of their Google account
@@ -287,7 +287,9 @@ function Chatbot() {
     setSelectedChat('newchat');
     if(user)
     {
-      fetchProfile().then(() => setUserid(getUserId()));
+      fetchProfile()
+        .then(() => getUserId)
+        .then((refreshedUserId) => setUserid(refreshedUserId));
     }
   }, [user]);
 
