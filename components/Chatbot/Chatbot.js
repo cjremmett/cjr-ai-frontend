@@ -285,6 +285,7 @@ function Chatbot() {
     }
 
     setSelectedChat('newchat');
+    console.log('useeffect user: ' + user);
     if(user)
     {
       fetchProfile()
@@ -294,6 +295,7 @@ function Chatbot() {
   }, [user]);
 
   useEffect(() => {
+    console.log('useeffect userid: ' + userid);
     if(userid)
     {
       populateChats();
