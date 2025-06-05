@@ -171,18 +171,21 @@ function Chatbot() {
 
   // Uses Google library to handle OAuth handshake
   const login = useGoogleLogin({
-    onSuccess: (codeResponse) => setUser(codeResponse),
+    onSuccess: (codeResponse) => {
+      setUser(codeResponse);
+      return codeResponse;
+    },
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
 
-  async function fetchProfile() {
+  async function fetchProfile(userInfo) {
     try {
       const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
-        headers: { Authorization: `Bearer ${user.access_token}` },
+        headers: { Authorization: `Bearer ${userInfo.access_token}` },
       });
       const data = await res.json();
       setProfile(data);
-      localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
+      localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(userInfo)); // Store user in localStorage
       localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -190,9 +193,10 @@ function Chatbot() {
   }
 
   const loginWrapper = () => {
-    login();
+    let codeResponse = login();
+    console.log(codeResponse.access_token);
     setSelectedChat('newchat');
-    fetchProfile()
+    fetchProfile(codeResponse)
       .then(() => getUserId)
       .then((refreshedUserId) => setUserid(refreshedUserId));
   };
