@@ -174,7 +174,9 @@ function Chatbot() {
     onSuccess: (codeResponse) => {
       setUser(codeResponse);
       console.log('In success: ' + codeResponse.access_token);
-      return codeResponse;
+      fetchProfile(codeResponse)
+        .then(() => getUserId)
+        .then((refreshedUserId) => setUserid(refreshedUserId));
     },
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
@@ -196,10 +198,7 @@ function Chatbot() {
   const loginWrapper = () => {
     let codeResponse = login();
     console.log(codeResponse.access_token);
-    setSelectedChat('newchat');
-    fetchProfile(codeResponse)
-      .then(() => getUserId)
-      .then((refreshedUserId) => setUserid(refreshedUserId));
+    
   };
 
   // Clean up Google account info.
