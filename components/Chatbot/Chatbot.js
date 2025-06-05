@@ -173,6 +173,7 @@ function Chatbot() {
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => {
       setUser(codeResponse);
+      console.log('In success: ' + codeResponse.access_token);
       return codeResponse;
     },
     onError: (error) => console.log('Google Sign In Failed:', error),
