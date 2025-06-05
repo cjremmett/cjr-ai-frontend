@@ -230,10 +230,12 @@ function Chatbot() {
     let localTempId = localStorage.getItem('cjr-ai-userid');
     if(googleAccountUserId)
     {
+      console.log('Resolved: '+ googleAccountUserId);
       resolve(googleAccountUserId);
     }
     else if(localTempId)
     {
+      console.log('Resolved: '+ localTempId);
       resolve(localTempId);
     }
     else
@@ -245,6 +247,7 @@ function Chatbot() {
           if(data.userid)
           {
             localStorage.setItem('cjr-ai-userid', data.userid);
+            console.log('Resolved: '+ data.userid);
             resolve(data.userid);
           }
           else
