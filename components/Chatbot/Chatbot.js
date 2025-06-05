@@ -175,6 +175,28 @@ function Chatbot() {
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
 
+  async function fetchProfile() {
+    try {
+      const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+        headers: { Authorization: `Bearer ${user.access_token}` },
+      });
+      const data = await res.json();
+      setProfile(data);
+      localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
+      localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  }
+
+  const loginWrapper = () => {
+    login();
+    setSelectedChat('newchat');
+    fetchProfile()
+      .then(() => getUserId)
+      .then((refreshedUserId) => setUserid(refreshedUserId));
+  };
+
   // Clean up Google account info.
   const logOut = () => {
     googleLogout();
@@ -271,32 +293,6 @@ function Chatbot() {
     getUserId.then((refreshedUserId) => setUserid(refreshedUserId));
   }, []);
 
-  // Only called when the user logs in or out of their Google account
-  useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
-          headers: { Authorization: `Bearer ${user.access_token}` },
-        });
-        const data = await res.json();
-        setProfile(data);
-        localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(user)); // Store user in localStorage
-        localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    }
-
-    setSelectedChat('newchat');
-    console.log('useeffect user: ' + user);
-    if(user)
-    {
-      fetchProfile()
-        .then(() => getUserId)
-        .then((refreshedUserId) => setUserid(refreshedUserId));
-    }
-  }, [user]);
-
   useEffect(() => {
     console.log('useeffect userid: ' + userid);
     if(userid)
@@ -372,7 +368,7 @@ function Chatbot() {
     <>
       <div className="auth-info-pane">
         <div className="google-signin-fixed">
-          <GoogleSignIn login={ login } logOut={ logOut } profile={ profile } />
+          <GoogleSignIn login={ loginWrapper } logOut={ logOut } profile={ profile } />
         </div>
       </div>
       <div className="chatbot-container">
