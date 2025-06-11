@@ -71,6 +71,10 @@ function Chatbot() {
   // Contains user profile information (e.g. name, email, google id)
   const [profile, setProfile] = useState(null);
 
+  let googleProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+  let googleUser = localStorage.getItem('cjremmett-ai-googleUser');
+  let localCjrId = localStorage.getItem('cjr-ai-userid');
+
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
   function getQuarterFromString(qString) {
     const match = /^Q(\d)\s+\d{4}$/.exec(qString);
@@ -191,8 +195,12 @@ function Chatbot() {
       });
       const data = await res.json();
       setProfile(data);
-      localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(userInfo)); // Store user in localStorage
-      localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(data)); // Store profile in localStorage
+      let userInfo = JSON.stringify(userInfo);
+      let profileInfo = JSON.stringify(data);
+      localStorage.setItem('cjremmett-ai-googleUser', userInfo); // Store user in localStorage
+      localStorage.setItem('cjremmett-ai-googleProfile', profileInfo); // Store profile in localStorage
+      googleProfile = profileInfo;
+      googleUser = userInfo;
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
@@ -212,6 +220,8 @@ function Chatbot() {
     // Clear Google account info from localstorage
     localStorage.removeItem('cjremmett-ai-googleProfile');
     localStorage.removeItem('cjremmett-ai-googleUser');
+    googleProfile = null;
+    googleUser = null;
 
     setProfile(null);
     setUser(null);
@@ -226,7 +236,7 @@ function Chatbot() {
 
   // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
   function getGoogleAccountUserId() {
-    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    const storedProfile = googleProfile;
     if (storedProfile) {
       try {
         const profile = JSON.parse(storedProfile);
@@ -263,7 +273,7 @@ function Chatbot() {
     // use the local ID, if that doesn't exist either then
     // call the backend to get a new local ID
     let googleAccountUserId = getGoogleAccountUserId();
-    let localTempId = localStorage.getItem('cjr-ai-userid');
+    let localTempId = localCjrId;
     if(googleAccountUserId)
     {
       console.log('Resolved: '+ googleAccountUserId);
@@ -283,6 +293,7 @@ function Chatbot() {
           if(data.userid)
           {
             localStorage.setItem('cjr-ai-userid', data.userid);
+            localCjrId = data.userid;
             console.log('Resolved: '+ data.userid);
             resolve(data.userid);
           }
