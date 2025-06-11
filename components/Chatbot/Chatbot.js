@@ -218,6 +218,7 @@ function Chatbot() {
     setSelectedChat('newchat');
     getUserId
     .then((refreshedUserId) => {
+      console.log("logout refresheduserid: " + refreshedUserId);
       populateChats(refreshedUserId);
       setUserid(refreshedUserId);
     });
