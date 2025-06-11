@@ -71,9 +71,9 @@ function Chatbot() {
   // Contains user profile information (e.g. name, email, google id)
   const [profile, setProfile] = useState(null);
 
-  let googleProfile = localStorage.getItem('cjremmett-ai-googleProfile');
-  let googleUser = localStorage.getItem('cjremmett-ai-googleUser');
-  let localCjrId = localStorage.getItem('cjr-ai-userid');
+  let googleProfile = null;
+  let googleUser = null;
+  let localCjrId = null;
 
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
   function getQuarterFromString(qString) {
