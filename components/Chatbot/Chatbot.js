@@ -71,10 +71,6 @@ function Chatbot() {
   // Contains user profile information (e.g. name, email, google id)
   const [profile, setProfile] = useState(null);
 
-  let googleProfile = null;
-  let googleUser = null;
-  let localCjrId = null;
-
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
   function getQuarterFromString(qString) {
     const match = /^Q(\d)\s+\d{4}$/.exec(qString);
@@ -194,13 +190,11 @@ function Chatbot() {
         headers: { Authorization: `Bearer ${userInfo.access_token}` },
       });
       const data = await res.json();
-      setProfile(data);
-      let userInfo = JSON.stringify(userInfo);
+      let userInfoLs = JSON.stringify(userInfo);
       let profileInfo = JSON.stringify(data);
-      localStorage.setItem('cjremmett-ai-googleUser', userInfo); // Store user in localStorage
+      setProfile(data);
+      localStorage.setItem('cjremmett-ai-googleUser', userInfoLs); // Store user in localStorage
       localStorage.setItem('cjremmett-ai-googleProfile', profileInfo); // Store profile in localStorage
-      googleProfile = profileInfo;
-      googleUser = userInfo;
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
