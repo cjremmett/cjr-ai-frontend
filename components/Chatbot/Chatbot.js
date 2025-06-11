@@ -204,6 +204,7 @@ function Chatbot() {
 
   // Clean up Google account info.
   const logOut = () => {
+    console.log('In google log out...');
     googleLogout();
 
     // Clear Google account info from localstorage
@@ -235,6 +236,7 @@ function Chatbot() {
   // Makes an API call to update the list of chats
   function populateChats()
   {
+    console.log('Populating chats with userid ' + userid);
     // Uses a dummy chat element to respresent the new chat window
     fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + userid)
       .then(response => response.json())
