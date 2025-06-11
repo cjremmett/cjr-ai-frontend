@@ -11,7 +11,8 @@ import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 
 let baseUrl = 'https://ectai.cjremmett.com';
 
-function Chatbot() {
+function Chatbot() 
+{
 
   const [chats, setChats] = useState([]);
     // Should be in the following format:
@@ -65,11 +66,6 @@ function Chatbot() {
   
   // Disables the button to start a new chat while it's already processing a previous request to start a new chat
   const [newChatWorking, setNewChatWorking] = useState(false);
-
-  // Contains the authorization token for completing the OAuth handshake
-  const [user, setUser] = useState(null);
-  // Contains user profile information (e.g. name, email, google id)
-  const [profile, setProfile] = useState(null);
 
   // Returns the quarter as an integer (e.g., 1 for "Q1 2025")
   function getQuarterFromString(qString) {
@@ -172,38 +168,34 @@ function Chatbot() {
   // Uses Google library to handle OAuth handshake
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => {
-      setUser(codeResponse);
       console.log('In success: ' + codeResponse.access_token);
       fetchProfile(codeResponse)
-        .then(() => getUserId)
-        .then((refreshedUserId) => {
-          populateChats(refreshedUserId);
-          setUserid(refreshedUserId);
+        .then((profileData) => {
+          localStorage.setItem('cjremmett-ai-googleUser', JSON.stringify(codeResponse)); // Store user in localStorage
+          localStorage.setItem('cjremmett-ai-googleProfile', JSON.stringify(profileData)); // Store profile in localStorage
+          let googleUserid = profileData.id;
+          console.log("Populating chats with new Google ID: " + googleUserid);
+          setUserid(googleUserid);
+          populateChats(googleUserid);
         });
     },
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
 
   async function fetchProfile(userInfo) {
-    try {
+    try
+    {
       const res = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
         headers: { Authorization: `Bearer ${userInfo.access_token}` },
       });
       const data = await res.json();
-      let userInfoLs = JSON.stringify(userInfo);
-      let profileInfo = JSON.stringify(data);
-      setProfile(data);
-      localStorage.setItem('cjremmett-ai-googleUser', userInfoLs); // Store user in localStorage
-      localStorage.setItem('cjremmett-ai-googleProfile', profileInfo); // Store profile in localStorage
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    }
+      return data;
+    } catch (error) { console.error('Error fetching user profile:', error); }
   }
 
   const loginWrapper = () => {
     let codeResponse = login();
     console.log('Login wrapper: ' + codeResponse.access_token);
-    
   };
 
   // Clean up Google account info.
@@ -214,33 +206,13 @@ function Chatbot() {
     // Clear Google account info from localstorage
     localStorage.removeItem('cjremmett-ai-googleProfile');
     localStorage.removeItem('cjremmett-ai-googleUser');
-    googleProfile = null;
-    googleUser = null;
 
-    setProfile(null);
-    setUser(null);
+    let localUserid = localStorage.getItem('cjr-ai-userid');
+    setUserid(localUserid);
+    populateChats(localUserid);
     setSelectedChat('newchat');
-    getUserId
-    .then((refreshedUserId) => {
-      console.log("logout refresheduserid: " + refreshedUserId);
-      populateChats(refreshedUserId);
-      setUserid(refreshedUserId);
-    });
   };
 
-  // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
-  function getGoogleAccountUserId() {
-    const storedProfile = googleProfile;
-    if (storedProfile) {
-      try {
-        const profile = JSON.parse(storedProfile);
-        return profile.id || null;
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  } 
 
   // Makes an API call to update the list of chats
   function populateChats(refreshedUserid)
@@ -259,65 +231,47 @@ function Chatbot() {
         },...data]))
       .catch(() => {handleConnectionFailure()})
   }
-
-  const getUserId = new Promise((resolve, reject) => {
-    console.log('Triggered userid refresh.');
-
-    // Use the Google ID if available, if not then
-    // use the local ID, if that doesn't exist either then
-    // call the backend to get a new local ID
-    let googleAccountUserId = getGoogleAccountUserId();
-    let localTempId = localCjrId;
-    if(googleAccountUserId)
-    {
-      console.log('Resolved: '+ googleAccountUserId);
-      resolve(googleAccountUserId);
-    }
-    else if(localTempId)
-    {
-      console.log('Resolved: '+ localTempId);
-      resolve(localTempId);
-    }
-    else
-    {
-      // If not found, fetch a new userid from the server
-      fetch(baseUrl + "/get-new-ai-userid")
-        .then(response => response.json())
-        .then(data => {
-          if(data.userid)
-          {
-            localStorage.setItem('cjr-ai-userid', data.userid);
-            localCjrId = data.userid;
-            console.log('Resolved: '+ data.userid);
-            resolve(data.userid);
-          }
-          else
-          {
-            handleConnectionFailure();
-          }
-        })
-        .catch(() => {handleConnectionFailure()})
-    }
-  });
   
   useEffect(() => {
     console.log('Initial render triggered...');
     // Load profile from localStorage on initial render
-    googleProfile = localStorage.getItem('cjremmett-ai-googleProfile');
-    googleUser = localStorage.getItem('cjremmett-ai-googleUser');
-    localCjrId = localStorage.getItem('cjr-ai-userid');
-    
-    const storedProfile = googleProfile;
+    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
     if(storedProfile)
     {
-      setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
+      let googleProfileJson = JSON.parse(storedProfile);
+      console.log("Found google userid: " + googleProfileJson.id)
+      setUserid(googleProfileJson.id);
+      populateChats(googleProfileJson.id);
+      return;
+    }
+    
+    const storedLocalUserid = localStorage.getItem('cjr-ai-userid');
+    if(storedLocalUserid)
+    {
+      console.log("Found local userid: " + storedLocalUserid);
+      setUserid(storedLocalUserid);
+      populateChats(storedLocalUserid);
+      return
     }
 
-    getUserId
-    .then((refreshedUserId) => {
-      populateChats(refreshedUserId);
-      setUserid(refreshedUserId);
-    });
+    // If not found, fetch a new userid from the server
+    fetch(baseUrl + "/get-new-ai-userid")
+    .then(response => response.json())
+    .then(data => {
+      if(data.userid)
+      {
+        newLocalUserid = data.userid;
+        localStorage.setItem('cjr-ai-userid', newLocalUserid);
+        console.log("Got new userid from server: " + newLocalUserid);
+        setUserid(newLocalUserid);
+        populateChats(newLocalUserid);
+      }
+      else
+      {
+        handleConnectionFailure();
+      }
+    })
+    .catch(() => {handleConnectionFailure()})
   }, []);
     
   // Make an API call to populate the contents of the chat the user switched to.
