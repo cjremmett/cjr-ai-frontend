@@ -176,8 +176,10 @@ function Chatbot() {
       console.log('In success: ' + codeResponse.access_token);
       fetchProfile(codeResponse)
         .then(() => getUserId)
-        .then((refreshedUserId) => setUserid(refreshedUserId))
-        .then(() => populateChats());
+        .then((refreshedUserId) => {
+          populateChats(refreshedUserId);
+          setUserid(refreshedUserId);
+        });
     },
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
@@ -215,8 +217,10 @@ function Chatbot() {
     setUser(null);
     setSelectedChat('newchat');
     getUserId
-    .then((refreshedUserId) => setUserid(refreshedUserId))
-    .then(() => populateChats());
+    .then((refreshedUserId) => {
+      populateChats(refreshedUserId);
+      setUserid(refreshedUserId);
+    });
   };
 
   // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
@@ -234,14 +238,14 @@ function Chatbot() {
   } 
 
   // Makes an API call to update the list of chats
-  function populateChats()
+  function populateChats(refreshedUserid)
   {
-    console.log('Populating chats with userid ' + userid);
+    console.log('Populating chats with userid ' + refreshedUserid);
     // Uses a dummy chat element to respresent the new chat window
-    fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + userid)
+    fetch(baseUrl + '/get-earnings-call-chats-for-user?userid=' + refreshedUserid)
       .then(response => response.json())
       .then(data => setChats([{
-            "userid": userid,
+            "userid": refreshedUserid,
             "chatid": 'newchat',
             "ticker": "",
             "year": null,
@@ -300,8 +304,10 @@ function Chatbot() {
     }
 
     getUserId
-    .then((refreshedUserId) => setUserid(refreshedUserId))
-    .then(() => populateChats());
+    .then((refreshedUserId) => {
+      populateChats(refreshedUserId);
+      setUserid(refreshedUserId);
+    });
   }, []);
     
   // Make an API call to populate the contents of the chat the user switched to.
