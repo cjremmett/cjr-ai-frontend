@@ -309,7 +309,11 @@ function Chatbot() {
   useEffect(() => {
     console.log('Initial render triggered...');
     // Load profile from localStorage on initial render
-    const storedProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    let googleProfile = localStorage.getItem('cjremmett-ai-googleProfile');
+    let googleUser = localStorage.getItem('cjremmett-ai-googleUser');
+    let localCjrId = localStorage.getItem('cjr-ai-userid');
+    
+    const storedProfile = googleProfile;
     if(storedProfile)
     {
       setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
