@@ -176,7 +176,8 @@ function Chatbot() {
       console.log('In success: ' + codeResponse.access_token);
       fetchProfile(codeResponse)
         .then(() => getUserId)
-        .then((refreshedUserId) => setUserid(refreshedUserId));
+        .then((refreshedUserId) => setUserid(refreshedUserId))
+        .then(() => populateChats());
     },
     onError: (error) => console.log('Google Sign In Failed:', error),
   });
@@ -197,7 +198,7 @@ function Chatbot() {
 
   const loginWrapper = () => {
     let codeResponse = login();
-    console.log(codeResponse.access_token);
+    console.log('Login wrapper: ' + codeResponse.access_token);
     
   };
 
@@ -212,7 +213,9 @@ function Chatbot() {
     setProfile(null);
     setUser(null);
     setSelectedChat('newchat');
-    getUserId.then((refreshedUserId) => setUserid(refreshedUserId));
+    getUserId
+    .then((refreshedUserId) => setUserid(refreshedUserId))
+    .then(() => populateChats());
   };
 
   // Retrieves the user's unique Google ID as a string if it exists, otherwise returns null
@@ -294,16 +297,10 @@ function Chatbot() {
       setProfile(JSON.parse(storedProfile)); // Parse JSON string to object
     }
 
-    getUserId.then((refreshedUserId) => setUserid(refreshedUserId));
+    getUserId
+    .then((refreshedUserId) => setUserid(refreshedUserId))
+    .then(() => populateChats());
   }, []);
-
-  useEffect(() => {
-    console.log('useeffect userid: ' + userid);
-    if(userid)
-    {
-      populateChats();
-    }
-  }, [userid]);
     
   // Make an API call to populate the contents of the chat the user switched to.
   // If they're in newchat, clear the message array.
