@@ -56,6 +56,7 @@ function Chatbot()
   // Controls whether the user can send a message to the backend
   const [inputEnabled, setInputEnabled] = useState(true);
   const [userid, setUserid] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   // newChatMessage is the text displayed on the new chat window. It gets changed to an error message if the user enters a bad ticker, API has no data, etc.
   const defaultNewChatMessage = "Please select a stock ticker and quarter. The AI will use RAG to answer questions about the earnings call transcript for that quarter, even if it falls outside the model's knowledge cutoff.";
@@ -177,6 +178,7 @@ function Chatbot()
           console.log("Populating chats with new Google ID: " + googleUserid);
           setUserid(googleUserid);
           populateChats(googleUserid);
+          setProfile(JSON.stringify(profileData));
         });
     },
     onError: (error) => console.log('Google Sign In Failed:', error),
@@ -211,6 +213,7 @@ function Chatbot()
     setUserid(localUserid);
     populateChats(localUserid);
     setSelectedChat('newchat');
+    setProfile(null);
   };
 
 
@@ -242,6 +245,7 @@ function Chatbot()
       console.log("Found google userid: " + googleProfileJson.id)
       setUserid(googleProfileJson.id);
       populateChats(googleProfileJson.id);
+      setProfile(googleProfileJson);
       return;
     }
     
